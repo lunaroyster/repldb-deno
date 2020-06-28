@@ -1,3 +1,4 @@
+
 class ReplDBClient {
 	url: string;
 	constructor(dbUrl: string) {
@@ -94,9 +95,9 @@ class ReplDBClient {
 	/**
 	 * Deletes all keys (and their values) with given `prefix`
 	 */
-	async DeletePrefix(prefix: string): Promise<boolean> {
+	async DeletePrefix(prefix: string, force?: boolean): Promise<boolean> {
 
-		if (!prefix) {
+		if (!prefix && !force) {
 			throw new Error('`prefix` not provided. To delete all keys, explicitly use `.DeleteEverything()`')
 		}
 
@@ -111,6 +112,8 @@ class ReplDBClient {
 	 * Deletes all keys and values.
 	 */
 	async DeleteEverything(): Promise<boolean> {
-		return await this.DeletePrefix('');
+		return await this.DeletePrefix('', true);
 	}
 }
+
+export default ReplDBClient;
