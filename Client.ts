@@ -24,19 +24,26 @@ export class ReplDBClient {
 		return new ReplDBClient(dbUrl, options);
 	}
 
-	/**
-	 * Gets the value corresponding to `key`, or null.
-	 */
+  /****************
+   * CORE FUNCTIONS
+   ****************/
+
+  /**
+	 * Gets the value corresponding to `key`, or null if that key doesn't exist
+   * @param key The ReplDB key
+   */
 	async Get (key: string) : Promise<string|null> {
 		let res = await fetch(`${this.url}/${key}`);
 		if (res.status === 404) {
 			return null;
 		}
 		return await res.text();
-	}
+  }
 
 	/**
-	 * Sets the value of `key` to `value`. Returns true on success.
+	 * Sets the value of `key` to the string `value`. Returns true on success.
+   * @param key
+   * @param value
 	 */
 	async Set(key: string, value: string) : Promise<boolean> {
 		if (typeof key !== 'string' || key == '') {
@@ -62,7 +69,8 @@ export class ReplDBClient {
 	}
 
 	/**
-	 * Returns a list of keys with the given `prefix`
+	 * Returns a list of keys with the given `prefix`.
+   * @param prefix Return keys starting with this prefix
 	 */
 	async ListPrefix(prefix: string): Promise<Array<string>> {
 
@@ -71,7 +79,8 @@ export class ReplDBClient {
 			prefix = '';
 		}
 
-		let params = (new URLSearchParams({prefix})).toString();
+    let params = (new URLSearchParams({prefix})).toString();
+
 		let res = await fetch(`${this.url}?${params}`, {
 			method: 'GET',
 		});
@@ -80,15 +89,18 @@ export class ReplDBClient {
 		}
 		let contents = await res.text();
 		return contents.split('\n');
-	}
+  }
+
 	/**
 	 * Lists all keys
 	 */
 	async ListAll(): Promise<Array<string>> {
 		return await this.ListPrefix('');
-	}
+  }
+
 	/**
 	 * Deletes given key (and its value)
+   * @param key the key to delete
 	 */
 	async Delete(key: string): Promise<boolean> {
 		
@@ -100,9 +112,12 @@ export class ReplDBClient {
 			method: 'DELETE',
 		});
 		return res.status === 200;
-	}
+  }
+
 	/**
 	 * Deletes all keys (and their values) with given `prefix`
+   * @param prefix delete keys that start with this prefix
+   * @param force when deleting all keys, set `force` to true to delete all keys.
 	 */
 	async DeletePrefix(prefix: string, force?: boolean): Promise<boolean> {
 
@@ -116,13 +131,18 @@ export class ReplDBClient {
 			if (result.status !== 'fulfilled' || result.value===false) return false
 		}
 		return true;
-	}
+  }
+
 	/**
 	 * Deletes all keys and values.
 	 */
 	async DeleteEverything(): Promise<boolean> {
 		return await this.DeletePrefix('', true);
-	}
+  }
+  
+  /*********************
+   * Interface functions
+   *********************/
 
 	async get(key: string) {
 		let value = await this.Get(key);
