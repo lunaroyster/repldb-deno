@@ -1,1 +1,1 @@
-export ReplDBClient from './Client.ts';
+export { ReplDBClient } from './Client.ts';
