@@ -1,18 +1,27 @@
+export type ReplDBClientMode = 'raw' | 'json';
+
+export interface ReplDBClientOptions {
+	mode: ReplDBClientMode;
+}
 
 export class ReplDBClient {
 	url: string;
-	constructor(dbUrl: string) {
+	mode?: ReplDBClientMode;
+	constructor(dbUrl: string, options?: ReplDBClientOptions) {
 		this.url = dbUrl;
+		if (options) {
+			this.mode = options.mode;
+		}
 	}
 	/**
 	 * Creates a ReplDBClient from the environment. (This works on a ReplDB enabled repl.)
 	 */
-	static createReplDBFromEnv() {
+	static createReplDBFromEnv(options?: ReplDBClientOptions) {
 		let dbUrl = Deno.env.get('REPLIT_DB_URL');
 		if (!dbUrl) {
 			throw new Error('REPLIT_DB_URL is not defined!')
 		}
-		return new ReplDBClient(dbUrl);
+		return new ReplDBClient(dbUrl, options);
 	}
 
 	/**
@@ -114,4 +123,20 @@ export class ReplDBClient {
 	async DeleteEverything(): Promise<boolean> {
 		return await this.DeletePrefix('', true);
 	}
+
+	async get(key: string) {
+		let value = await this.Get(key);
+		if (!value) return null;
+		if (this.mode === 'json') {
+			value = JSON.parse(value);
+		}
+		return value;
+	}
+	async set(key: string, value: any) {
+		if (this.mode === 'json') {
+			value = JSON.stringify(value);
+		}
+		await this.Set(key, value);
+	}
+
 }
