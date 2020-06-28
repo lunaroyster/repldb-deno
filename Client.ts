@@ -1,5 +1,5 @@
 
-class ReplDBClient {
+export class ReplDBClient {
 	url: string;
 	constructor(dbUrl: string) {
 		this.url = dbUrl;
@@ -115,5 +115,3 @@ class ReplDBClient {
 		return await this.DeletePrefix('', true);
 	}
 }
-
-export default ReplDBClient;
