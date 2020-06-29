@@ -90,14 +90,6 @@ export class ReplDBClient {
 		let contents = await res.text();
 		return contents.split('\n');
   }
-
-	/**
-	 * Lists all keys
-	 */
-	async ListAll(): Promise<Array<string>> {
-		return await this.ListPrefix('');
-  }
-
 	/**
 	 * Deletes given key (and its value)
    * @param key the key to delete
@@ -114,32 +106,6 @@ export class ReplDBClient {
 		return res.status === 200;
   }
 
-	/**
-	 * Deletes all keys (and their values) with given `prefix`
-   * @param prefix delete keys that start with this prefix
-   * @param force when deleting all keys, set `force` to true to delete all keys.
-	 */
-	async DeletePrefix(prefix: string, force?: boolean): Promise<boolean> {
-
-		if (!prefix && !force) {
-			throw new Error('`prefix` not provided. To delete all keys, explicitly use `.DeleteEverything()`')
-		}
-
-		let keys = await this.ListPrefix(prefix);
-		let results = await Promise.allSettled(keys.map(k => this.Delete(k)));
-		for (let result of results) {
-			if (result.status !== 'fulfilled' || result.value===false) return false
-		}
-		return true;
-  }
-
-	/**
-	 * Deletes all keys and values.
-	 */
-	async DeleteEverything(): Promise<boolean> {
-		return await this.DeletePrefix('', true);
-  }
-  
   /*********************
    * Interface functions
    *********************/
@@ -157,6 +123,39 @@ export class ReplDBClient {
 			value = JSON.stringify(value);
 		}
 		await this.Set(key, value);
-	}
+  }
+  /**
+	 * Lists keys
+   * @param prefix When provided, only returns keys containing prefix
+	 */
+	async list(prefix: string = ''): Promise<Array<string>> {
+		return await this.ListPrefix(prefix);
+  }
+
+  /**
+	 * Deletes all keys (and their values) with given `prefix`
+   * @param prefix delete keys that start with this prefix
+	 */
+	async _deletePrefix(prefix: string): Promise<boolean> {
+		let keys = await this.ListPrefix(prefix);
+		let results = await Promise.allSettled(keys.map(k => this.Delete(k)));
+		for (let result of results) {
+			if (result.status !== 'fulfilled' || result.value===false) return false
+		}
+		return true;
+  }
+  /**
+	 * Deletes all keys and values.
+	 */
+	async deleteEverything(): Promise<boolean> {
+		return await this._deletePrefix('');
+  }
+  
+  async deletePrefix(prefix: string) {
+		if (!prefix) {
+			throw new Error('`prefix` not provided. To delete all keys, explicitly use `.deleteEverything()`')
+    }
+    return await this._deletePrefix(prefix);
+  }
 
 }
