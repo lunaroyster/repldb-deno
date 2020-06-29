@@ -88,7 +88,7 @@ export class ReplDBClient {
 			return [];
 		}
 		let contents = await res.text();
-		return contents.split('\n');
+		return contents.split('\n').filter(k => k !== '');
   }
 	/**
 	 * Deletes given key (and its value)
@@ -130,6 +130,10 @@ export class ReplDBClient {
 	 */
 	async list(prefix: string = ''): Promise<Array<string>> {
 		return await this.ListPrefix(prefix);
+  }
+
+  async delete(key: string): Promise<boolean> {
+    return await this.Delete(key);
   }
 
   /**
