@@ -16,7 +16,7 @@ export class ReplDBClient {
 	/**
 	 * Creates a ReplDBClient from the environment. (This works on a ReplDB enabled repl.)
 	 */
-	static createReplDBFromEnv(options?: ReplDBClientOptions) {
+	static createFromEnv(options?: ReplDBClientOptions) {
 		let dbUrl = Deno.env.get('REPLIT_DB_URL');
 		if (!dbUrl) {
 			throw new Error('REPLIT_DB_URL is not defined!')
